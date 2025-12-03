@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* 全ての要素で「枠線と余白を幅に含める」設定（超重要） */
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      /* Safariでの文字サイズ自動調整を無効化 */
+      -webkit-text-size-adjust: 100%;
+      
+      background-image: radial-gradient(#ff9900 40px, #ffffff 40px);
+      background-size: 100px 100px;
+      background-repeat: repeat;
+
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; /* iPhone用フォントを追加 */
+      padding: 20px;
+      color: #2e4d26;
+      margin: 0; /* bodyの余白をリセット */
+      min-height: 100vh; /* 画面の高さいっぱいまで背景を広げる */
+    }
+
+    h1 {
+      color: #2e4d26;
+      text-align: center;
+      margin-bottom: 25px;
+      font-size: 2em;
+      text-shadow: 0 3px 6px rgba(255,165,0,0.4);
+    }
+
+    .question-box {
+      background: rgba(255,255,255,0.92);
+      padding: 20px;
+      border-radius: 15px;
+      max-width: 500px;
+      width: 100%;
+      margin: 0 auto 20px auto;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.18);
+      border-left: 10px solid #ff9933;
+
+      /* 【追加】中身が少なくてもペチャンコにならないようにする */
+      min-height: 300px; 
+      /* 【追加】文字が読みやすくなるように行間を空ける */
+      line-height: 1.6; 
+    }
+
+    .option {
+      display: block;
+      background: #fff7e8;
+      border: 2px solid #ffb766;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1.1em;
+      transition: 0.25s;
+      /* タップした時に青い色がつくのを防ぐ（スマホ用） */
+      -webkit-tap-highlight-color: transparent; 
+    }
+
+    .option:active {
+      background: #ffe2b3;
+      transform: scale(0.98);
+    }
+
+    /* PCがある場合のみhoverを適用 */
+    @media (hover: hover) {
+      .option:hover {
+        background: #ffe2b3;
+        transform: translateX(6px) scale(1.03);
+        box-shadow: 0 4px 10px rgba(255,165,0,0.3);
+      }
+    }
+
+    .next-btn {
+      display: inline-block;
+      background: #8ccf72;
+      padding: 12px 22px;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 20px;
+      color: white;
+      font-size: 1.1em;
+      transition: 0.3s cubic-bezier(0.25, 1.25, 0.5, 1.15);
+      animation: pop 0.5s ease-out;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(0.7); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .correct {
+      color: #3a7d28;
+      font-weight: bold;
+      font-size: 1.2em;
+    }
+
+    .wrong {
+      color: #d9534f;
+      font-weight: bold;
+      font-size: 1.2em;
+    }
+
+    /* --- スマホ向け調整 --- */
+    @media (max-width: 600px) {
+      body {
+        padding: 15px; /* 余白を少し調整 */
+      }
+
+      h1 {
+        font-size: 1.6em;
+        margin-top: 10px;
+      }
+
+      .question-box {
+        padding: 20px 15px; /* 横のpaddingを少し減らして文字スペース確保 */
+      }
+
+      .option {
+        font-size: 1em;
+        padding: 12px 10px;
+      }
+    }
+  </style>
+  <title>みかん化炭素クイズ</title>
+</head>
+<body>
+
+<h1>みかん化炭素クイズ</h1>
+
+<div id="quiz-area" class="question-box"></div>
+
+<script>
+  const quiz = [
+    {
+      q: "日本は二酸化炭素を輸入している。",
+      options: ["〇", "×"],
+      answer: 0,
+      explanation: "2023年には22,536トンも輸入されています。これは約71本のスギの木が1年間に吸収する量に相当します。"
+    },
+    {
+      q: "ハウス栽培で発生させている気体は？",
+      options: ["酸素", "二酸化炭素", "窒素"],
+      answer: 1,
+      explanation: "ハウスの中で灯油を燃やして二酸化炭素を発生させています。"
+    },
+    {
+      q: "Niterraのみかんと他の温室みかんとの違いは？",
+      options: ["他のみかんよりも大きい", "二酸化炭素を再活用して作られている", "ハウス栽培されていない"],
+      answer: 1,
+      explanation: "工場から排出された二酸化炭素を再活用して育てています。"
+    }
+  ];
+
+  let current = 0;
+
+  function renderQuiz() {
+    const q = quiz[current];
+    let html = `<h2>第${current + 1}問</h2>`;
+    html += `<p>${q.q}</p>`;
+
+    q.options.forEach((option, index) => {
+      html += `<div class='option' onclick='checkAnswer(${index})'>${option}</div>`;
+    });
+
+    document.getElementById("quiz-area").innerHTML = html;
+  }
+
+  function checkAnswer(selected) {
+    const q = quiz[current];
+    let result = "";
+
+    if (selected === q.answer) {
+      result = `<p class='correct'>正解！</p>`;
+    } else {
+      result = `<p class='wrong'>不正解…</p>`;
+    }
+
+    result += `<p>${q.explanation}</p>`;
+
+    if (current < quiz.length - 1) {
+      result += `<div class='next-btn' onclick='nextQuestion()'>次へ</div>`;
+    } else {
+      result += `<p style='margin-top:20px; font-size:1.1em;'>クイズはこれで終了です！</p>`;
+    }
+
+    document.getElementById("quiz-area").innerHTML = result;
+  }
+
+  function nextQuestion() {
+    current++;
+    renderQuiz();
+  }
+
+  renderQuiz();
+</script>
+
+</body>
+</html>
